@@ -423,28 +423,11 @@ class FinalBossScene extends Phaser.Scene {
         this.time.delayedCall(6000, function () { self.showEnding(); });
     }
     showEnding() {
-        var w = this.cameras.main.width, h = this.cameras.main.height, self = this;
+        var self = this;
+        // Fade out, sonra EndingScene'e gec - removeAll yerine temiz sahne gecisi
         this.cameras.main.fade(1200, 0, 0, 0);
-        this.time.delayedCall(1500, function () {
-            self.children.removeAll();
-            self.add.rectangle(w / 2, h / 2, w, h, 0x0a0e27);
-            for (var i = 0; i < 35; i++) {
-                var ht = self.add.text(Phaser.Math.Between(0, w), Phaser.Math.Between(h, h + 200), '❤️', { font: Phaser.Math.Between(14, 30) + 'px Arial' }).setAlpha(0.7);
-                self.tweens.add({ targets: ht, y: -30, duration: Phaser.Math.Between(3000, 6000), repeat: -1, delay: Phaser.Math.Between(0, 2000) });
-            }
-            self.add.text(w / 2, h * 0.12, 'Bazı oyunlar kazanmak için oynanır.\nBen bunu seni kaybetmemek için yaptım.', {
-                font: 'bold 22px Segoe UI', fill: '#fff', align: 'center', wordWrap: { width: w * 0.85 }
-            }).setOrigin(0.5);
-            self.add.text(w / 2, h * 0.35, '💕', { font: '60px Arial' }).setOrigin(0.5);
-            if (self.textures.exists('couple_photo')) {
-                self.add.image(w / 2, h * 0.55, 'couple_photo').setDisplaySize(200, 200);
-            } else {
-                self.add.text(w / 2, h * 0.55, C.PLAYER_NAME + ' ❤️ ' + C.PRINCESS_NAME, { font: 'bold 26px Segoe UI', fill: '#FF69B4' }).setOrigin(0.5);
-            }
-            self.add.text(w / 2, h * 0.75, 'Hep senin yanındayım,\nseni çok seviyorum. ❤️', { font: 'bold 18px Segoe UI', fill: '#FFD700', align: 'center' }).setOrigin(0.5);
-            var bb = self.add.rectangle(w / 2, h * 0.90, 200, 42, 0xFF1493).setInteractive({ useHandCursor: true }).setStrokeStyle(2, 0xFFD700);
-            self.add.text(w / 2, h * 0.90, '🏠 Ana Menü', { font: 'bold 18px Segoe UI', fill: '#fff' }).setOrigin(0.5);
-            bb.on('pointerdown', function () { self.scene.start('Intro'); });
+        this.time.delayedCall(1400, function () {
+            self.scene.start('Ending');
         });
     }
     update(t, dt) {
@@ -520,6 +503,90 @@ class FinalBossScene extends Phaser.Scene {
     }
 }
 
+
+// ===== ENDING SCENE =====
+class EndingScene extends Phaser.Scene {
+    constructor() { super({ key: 'Ending' }); }
+    create() {
+        var w = this.cameras.main.width;
+        var h = this.cameras.main.height;
+        var self = this;
+
+        // Siyah arka plan
+        this.add.rectangle(w / 2, h / 2, w, h, 0x0a0e27);
+
+        // Yukari ucusan kalpler
+        for (var i = 0; i < 30; i++) {
+            var ht = this.add.text(
+                Phaser.Math.Between(20, w - 20),
+                Phaser.Math.Between(h + 10, h + 180),
+                '❤️',
+                { font: Phaser.Math.Between(16, 32) + 'px Arial' }
+            ).setAlpha(0.8);
+            this.tweens.add({
+                targets: ht, y: -40,
+                duration: Phaser.Math.Between(3000, 7000),
+                repeat: -1,
+                delay: Phaser.Math.Between(0, 3000)
+            });
+        }
+
+        // Baslik
+        var title = this.add.text(w / 2, h * 0.10,
+            'Kazandın! Sevgin her şeyi yendi!',
+            { font: 'bold 24px Segoe UI', fill: '#FF69B4', align: 'center', wordWrap: { width: w * 0.88 } }
+        ).setOrigin(0.5).setAlpha(0);
+        this.tweens.add({ targets: title, alpha: 1, duration: 1000 });
+
+        // Foto veya isim
+        var photoY = h * 0.42;
+        if (this.textures.exists('couple_photo')) {
+            var photo = this.add.image(w / 2, photoY, 'couple_photo')
+                .setDisplaySize(Math.min(w * 0.55, 280), Math.min(w * 0.55, 280))
+                .setAlpha(0);
+            this.tweens.add({ targets: photo, alpha: 1, duration: 1200, delay: 400 });
+            // Foto etrafina kalp cercevesi
+            this.add.text(w / 2, photoY, '', { font: '0px Arial' }); // spacer
+        } else {
+            this.add.text(w / 2, photoY,
+                C.PLAYER_NAME + ' ❤️ ' + C.PRINCESS_NAME,
+                { font: 'bold 28px Segoe UI', fill: '#FF69B4' }
+            ).setOrigin(0.5);
+        }
+
+        // Ana mesaj - "Seni cok seviyorum"
+        var msg = this.add.text(w / 2, h * 0.72,
+            'Seni çok seviyorum,\nhep yanındayım. ❤️',
+            { font: 'bold 22px Segoe UI', fill: '#FFD700', align: 'center', wordWrap: { width: w * 0.85 } }
+        ).setOrigin(0.5).setAlpha(0);
+        this.tweens.add({ targets: msg, alpha: 1, duration: 1000, delay: 800 });
+
+        // Alt yazi
+        var sub = this.add.text(w / 2, h * 0.85,
+            'Bu oyun sadece sana yapıldı 💕',
+            { font: '15px Segoe UI', fill: '#aaa', align: 'center' }
+        ).setOrigin(0.5).setAlpha(0);
+        this.tweens.add({ targets: sub, alpha: 1, duration: 800, delay: 1400 });
+
+        // Ana menu butonu
+        var bb = this.add.rectangle(w / 2, h * 0.93, 210, 46, 0xFF1493, 1)
+            .setInteractive({ useHandCursor: true })
+            .setStrokeStyle(2, 0xFFD700)
+            .setAlpha(0);
+        var bbTxt = this.add.text(w / 2, h * 0.93, '🏠 Ana Menü', {
+            font: 'bold 18px Segoe UI', fill: '#fff'
+        }).setOrigin(0.5).setAlpha(0);
+        this.tweens.add({ targets: [bb, bbTxt], alpha: 1, duration: 800, delay: 1800 });
+        bb.on('pointerdown', function () { self.scene.start('Intro'); });
+        bb.on('pointerover', function () { bb.setFillStyle(0xFF69B4); });
+        bb.on('pointerout',  function () { bb.setFillStyle(0xFF1493); });
+
+        // Kamera fade-in
+        this.cameras.main.setAlpha(0);
+        this.tweens.add({ targets: this.cameras.main, alpha: 1, duration: 800 });
+    }
+}
+
 // ===== GAME CONFIG =====
 window.addEventListener('DOMContentLoaded', function () {
     // --- Orientation overlay (portrait = show warning) ---
@@ -567,10 +634,8 @@ window.addEventListener('DOMContentLoaded', function () {
             activePointers: 5
         },
         backgroundColor: '#0a0e27',
-        scene: [BootScene, IntroScene, TutorialScene, LevelScene, FinalBossScene]
+        scene: [BootScene, IntroScene, TutorialScene, LevelScene, FinalBossScene, EndingScene]
     });
 
     checkOrientation();
 });
-
-
